@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ethers.6.7.0 learn</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+      }
+      img {
+        width: 300px;
+      }
+    </style>
+  </head>
+  <body>
+    不要吐槽布局，主要学习的是ether.js这个js库。
+    <div>
+      <div>
+        本人用的是ganche本地测试工具，ALCHEMY_MAINNET_URL，ACCOUNT_ADDRESS，等url以及key全部来自于ganche
+        如图所示
+        <div>
+          <img src="./img/image.png" alt="" />
+        </div>
+      </div>
+    </div>
+    <div>
+      <div>
+        账号秘钥如图所示
+        <div>
+          <img src="./img/image1.png" alt="" />
+        </div>
+      </div>
+    </div>
+
+    <a href="https://www.wtf.academy/zh/course/ethers101">参考地址</a>
+    <script type="module">
+      import { ethers } from "https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.min.js";
+      // 利用公共rpc节点连接以太坊网络
+      const ALCHEMY_MAINNET_URL = "http://127.0.0.1:7545";
+      // 这里的地址是一个以太坊地址，类似于银行账号
+      const ACCOUNT_ADDRESS = `0x7D342B27b18A3D01aCD2F2a10f062F6D172ecc17`;
+      // 1.提供器 Provider
+      const provider = new ethers.JsonRpcProvider(ALCHEMY_MAINNET_URL);
+
+      const main = async () => {
+        /* 测试是否连接成功、*/
+        const balance = await provider.getBalance(ACCOUNT_ADDRESS);
+        console.log("1. 测试网的ETH余额");
+        console.log(
+          `ETH Balance of vitalik: ${ethers.formatEther(balance)} ETH`,
+        );
+        //  上段代码主要是测试是否链接本地ganche成功，查询ACCOUNT_ADDRESS账户下的余额
+        /* 测试是否连接成功、*/
+
+        // 利用getNetwork()查询provider连接到了哪条链
+        console.log("\n2. 查询provider连接到了哪条链");
+        const network = await provider.getNetwork();
+        // ethers v6版本, 以上代码中network不能直接console.log(), 具体原因参考: discussion-3977 https://github.com/ethers-io/ethers.js/discussions/3977
+        console.log(network);
+        // console.log(network.toJson());
+
+        console.log("\n3. 查询区块高度");
+        const blockNumber = await provider.getBlockNumber();
+        console.log(blockNumber);
+
+        console.log("\n4. 查询 vitalik 钱包历史交易次数");
+        const txCount = await provider.getTransactionCount(ACCOUNT_ADDRESS);
+        console.log(txCount);
+
+        console.log("\n5. 查询当前建议的gas设置");
+        const feeData = await provider.getFeeData();
+        console.log(feeData);
+
+        console.log("\n6. 查询区块信息");
+        const block = await provider.getBlock(0);
+        console.log(block);
+
+        console.log("\n7. 给定合约地址查询合约bytecode，例子用的WETH地址");
+        const code = await provider.getCode(
+          "0xc778417e063141139fce010982780140aa0cd5ab",
+        );
+        console.log(
+          "因为我本地还未部署合约，所以查询的结果是空的 0xc778417e063141139fce010982780140aa0cd5ab这个合约地址到的是一个WETH的合约地址",
+        );
+        console.log(code);
+      };
+
+      main();
+    </script>
+  </body>
+</html>
