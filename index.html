@@ -40,13 +40,14 @@
       // 利用公共rpc节点连接以太坊网络
       const ALCHEMY_MAINNET_URL = "http://127.0.0.1:7545";
       // 这里的地址是一个以太坊地址，类似于银行账号
-      const ACCOUNT_ADDRESS = `0x7D342B27b18A3D01aCD2F2a10f062F6D172ecc17`;
+      const ACCOUNT_ADDRESS = `0x4A96654ABe1eBe92c7123354e2fC06Cd091E6B9a`;
       // 1.提供器 Provider
       const provider = new ethers.JsonRpcProvider(ALCHEMY_MAINNET_URL);
 
       const main = async () => {
         /* 测试是否连接成功、*/
         const balance = await provider.getBalance(ACCOUNT_ADDRESS);
+        console.log("\n一./************** 提供器 Provider  *****************/");
         console.log("1. 测试网的ETH余额");
         console.log(
           `ETH Balance of vitalik: ${ethers.formatEther(balance)} ETH`,
@@ -85,6 +86,88 @@
           "因为我本地还未部署合约，所以查询的结果是空的 0xc778417e063141139fce010982780140aa0cd5ab这个合约地址到的是一个WETH的合约地址",
         );
         console.log(code);
+        console.log("\n二./************** Contract类  *****************/");
+        /* 在ethers中，Contract类是部署在以太坊网络上的合约（EVM字节码）的抽象。通过它，开发者可以非常容易的对合约进行读取call和交易transaction，并可以获得交易的结果和事件
+          Contract对象分为两类，只读和可读写。只读Contract只能读取链上合约信息，执行call操作，即调用合约中view和pure的函数，而不能执行交易transaction。创建这两种Contract变量的方法有所不同：
+          只读Contract：参数分别是合约地址，合约abi和provider变量（只读）。
+          const contract = new ethers.Contract(`address`, `abi`, `provider`);
+          可读写Contract：参数分别是合约地址，合约abi和signer变量。Signer签名者是ethers中的另一个类，用于签名交易，之后我们会讲到。
+          const contract = new ethers.Contract(`address`, `abi`, `signer`);*/
+
+        const abi = [
+          "function store(uint256 num) public",
+          "function retrieve() public view returns (uint256)",
+          "function test() external",
+          "event Debug(string message, uint256 value)",
+        ];
+
+        const contractAddress = `0x0a48Cc1e990fA0468F072143FaecE21698a3835d`;
+        const contract = new ethers.Contract(contractAddress, abi, provider);
+        console.log(contract);
+        const retrieveContract = await contract.retrieve();
+        console.log(retrieveContract);
+        // const symbolContract = await contract.symbol();
+        // const totalSupplyContract = await contract.totalSupply();
+
+        /*   发送eth   */
+        // 创建随机的wallet对象
+        // 创建随机的wallet对象
+        const wallet1 = ethers.Wallet.createRandom();
+        const wallet1WithProvider = wallet1.connect(provider);
+        const mnemonic = wallet1.mnemonic; // 获取助记词
+
+        // 利用私钥和provider创建wallet对象
+        const privateKey =
+          "0x749c4b481704cd860b05e2cde83e4233e4b833c598453d31567adca4a69e2c6b";
+        const wallet2 = new ethers.Wallet(privateKey, provider);
+
+        // 从助记词创建wallet对象
+        const wallet3 = ethers.Wallet.fromPhrase(mnemonic.phrase);
+        const address1 = await wallet1.getAddress();
+        const address2 = await wallet2.getAddress();
+        const address3 = await wallet3.getAddress(); // 获取地址
+        console.log(`1. 获取钱包地址`);
+        console.log(`钱包1地址: ${address1}`);
+        console.log(`钱包2地址: ${address2}`);
+        console.log(`钱包3地址: ${address3}`);
+        console.log(`钱包1和钱包3的地址是否相同: ${address1 === address3}`);
+        console.log(`钱包1助记词: ${wallet1.mnemonic.phrase}`);
+        console.log(`钱包2私钥: ${wallet2.privateKey}`);
+        const txCount1 =
+          await provider.getTransactionCount(wallet1WithProvider);
+        const txCount2 = await provider.getTransactionCount(wallet2);
+        console.log(`钱包1发送交易次数: ${txCount1}`);
+        console.log(`钱包2发送交易次数: ${txCount2}`);
+
+        // 5. 发送ETH
+
+        console.log(`\n5. 发送ETH（测试网）`);
+        // i. 打印交易前余额
+        console.log(`i. 发送前余额`);
+        console.log(
+          `钱包1: ${ethers.formatEther(await provider.getBalance(wallet1WithProvider))} ETH`,
+        );
+        console.log(
+          `钱包2: ${ethers.formatEther(await provider.getBalance(wallet2))} ETH`,
+        );
+        // ii. 构造交易请求，参数：to为接收地址，value为ETH数额
+        const tx = {
+          to: address1,
+          value: ethers.parseEther("0.001"),
+        };
+        // iii. 发送交易，获得收据
+        console.log(`\nii. 等待交易在区块链确认（需要几分钟）`);
+        const receipt = await wallet2.sendTransaction(tx);
+        await receipt.wait(); // 等待链上确认交易
+        console.log(receipt); // 打印交易详情
+        // iv. 打印交易后余额
+        console.log(`\niii. 发送后余额`);
+        console.log(
+          `钱包1: ${ethers.formatEther(await provider.getBalance(wallet1WithProvider))} ETH`,
+        );
+        console.log(
+          `钱包2: ${ethers.formatEther(await provider.getBalance(wallet2))} ETH`,
+        );
       };
 
       main();
