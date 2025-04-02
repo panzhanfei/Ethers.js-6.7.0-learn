@@ -201,6 +201,14 @@
           `存款后WETH持仓: ${ethers.formatEther(contract1_deposit)}\n`,
         );
       };
+      /*  部署合约 ContractFactory  */
+      // 1.创建工厂
+      // const contractFactory = new ethers.ContractFactory(abi, bytecode, signer);
+      // 在创建好合约工厂实例之后，可以调用它的deploy函数并传入合约构造函数的参数args来部署并获得合约实例：
+      // const contract = await contractFactory.deploy(args);
+      // contract.target获取合约地址，
+      // contract.deployTransaction获取部署详情，
+      // contractERC20.waitForDeployment()等待合约部署在链上确认
 
       main();
     </script>
