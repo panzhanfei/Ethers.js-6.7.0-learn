@@ -200,16 +200,35 @@
         console.log(
           `存款后WETH持仓: ${ethers.formatEther(contract1_deposit)}\n`,
         );
-      };
-      /*  部署合约 ContractFactory  */
-      // 1.创建工厂
-      // const contractFactory = new ethers.ContractFactory(abi, bytecode, signer);
-      // 在创建好合约工厂实例之后，可以调用它的deploy函数并传入合约构造函数的参数args来部署并获得合约实例：
-      // const contract = await contractFactory.deploy(args);
-      // contract.target获取合约地址，
-      // contract.deployTransaction获取部署详情，
-      // contractERC20.waitForDeployment()等待合约部署在链上确认
 
+        /*  部署合约 ContractFactory  */
+        // 1.创建工厂
+        // const contractFactory = new ethers.ContractFactory(abi, bytecode, signer);
+        // 在创建好合约工厂实例之后，可以调用它的deploy函数并传入合约构造函数的参数args来部署并获得合约实例：
+        // const contract = await contractFactory.deploy(args);
+        // contract.target获取合约地址，
+        // contract.deployTransaction获取部署详情，
+        // contractERC20.waitForDeployment()等待合约部署在链上确认
+
+        /*  检索事件 Event  */
+        // 我们可以利用Ethers中合约类型的queryFilter()函数读取合约释放的事件。
+        // const transferEvents = await contract.queryFilter('事件名', 起始区块, 结束区块)
+        console.log(`打印事件详情:`);
+        const transferEvents = await contract.queryFilter(
+          "Debug(string message, uint256 value)",
+          blockNumber - 10,
+          blockNumber,
+        );
+        console.log(transferEvents[0]);
+
+        /*  监听合约事件 Event  contract.on  contract.once*/
+        contract.on("Debug", (message, value) => {
+          console.log("on", `${message}-${value}`);
+        });
+        contract.once("Debug", (message, value) => {
+          console.log("once", `${message}-${value}`);
+        });
+      };
       main();
     </script>
   </body>
